@@ -1,5 +1,3 @@
-include platform.mk
-
 CC ?= gcc
 CXX ?= g++
 LUA_INCDIR ?= /opt/homebrew/include/lua5.4
