@@ -129,7 +129,7 @@ extern "C" {
 
     static int lua_zstd_create_c_context(lua_State *L) {
         lua_settop(L, 1);
-        int level = luaL_optinteger(L, 1, ZSTD_defaultCLevel());
+        int level = luaL_optinteger(L, 1, ZSTD_CLEVEL_DEFAULT);
 
         lua_settop(L, 0);
 
@@ -262,7 +262,7 @@ extern "C" {
         lua_settop(L, 2);
         size_t data_len;
         const char * data = luaL_checklstring(L, 1, &data_len);
-        int level = luaL_optinteger(L, 2, ZSTD_defaultCLevel());
+        int level = luaL_optinteger(L, 2, ZSTD_CLEVEL_DEFAULT);
 
         lua_settop(L, 0);
 
