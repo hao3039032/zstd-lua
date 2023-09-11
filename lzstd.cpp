@@ -19,6 +19,132 @@ extern "C" {
     #define check_d_context(L, idx)\
             *(ZSTD_DCtx **)luaL_checkudata(L, idx, "zstd_d_context")
 
+    #define check_c_dict(L, idx)\
+            *(ZSTD_CDict **)luaL_checkudata(L, idx, "zstd_c_dict")
+
+    #define check_d_dict(L, idx)\
+            *(ZSTD_DDict **)luaL_checkudata(L, idx, "zstd_d_dict")
+
+    /**
+     * ZSTD D Dict
+     * 
+     */
+    static int lua_zstd_d_dict_tostring(lua_State *L) {
+        lua_settop(L, 1);
+        ZSTD_DDict * d_dict = check_d_dict(L, 1);
+
+        lua_settop(L, 0);
+
+        lua_pushfstring(L, "zstd_d_dict: %p", d_dict);
+        return 1;
+    }
+
+    static int lua_zstd_d_dict_gc(lua_State *L) {
+        lua_settop(L, 1);
+        ZSTD_DDict ** p_d_dict = (ZSTD_DDict **)luaL_checkudata(L, 1, "zstd_d_dict");
+        ZSTD_DDict * d_dict = *p_d_dict;
+
+        lua_settop(L, 0);
+
+        ZSTD_freeDDict(d_dict);
+        *p_d_dict = nullptr;
+        return 0;
+    }
+
+    static int lua_zstd_create_d_dict(lua_State *L) {
+        lua_settop(L, 1);
+        size_t dict_buff_len;
+        const char * dict_buff = luaL_checklstring(L, 1, &dict_buff_len);
+
+        ZSTD_DDict * d_dict = ZSTD_createDDict(dict_buff, dict_buff_len);
+        if (!d_dict) {
+            return luaL_error(L, "zstd error: can not create a DDict");
+        }
+
+        ZSTD_DDict ** p_ddict = (ZSTD_DDict **)lua_newuserdata(L, sizeof(void *));
+
+        lua_settop(L, 0);
+        if (luaL_newmetatable(L, "zstd_d_dict")) {
+            *p_ddict = d_dict;
+
+            lua_pushcfunction(L, lua_zstd_d_dict_tostring);
+            lua_setfield(L, -2, "__tostring");
+
+            lua_pushcfunction(L, lua_zstd_d_dict_gc);
+            lua_setfield(L, -2, "__gc");
+
+            lua_setmetatable(L, -2);
+            return 1;
+        } else {
+            ZSTD_freeDDict(d_dict);
+            return luaL_error(L, "zstd error: can not create a zstd_d_dict metatable");
+        }
+    }
+
+
+    /**
+     * ZSTD C Dict
+     * 
+     */
+    
+    static int lua_zstd_c_dict_tostring(lua_State *L) {
+        lua_settop(L, 1);
+        ZSTD_CDict * c_dict = check_c_dict(L, 1);
+
+        lua_settop(L, 0);
+
+        lua_pushfstring(L, "zstd_c_dict: %p", c_dict);
+        return 1;
+    }
+
+    static int lua_zstd_c_dict_gc(lua_State *L) {
+        lua_settop(L, 1);
+        ZSTD_CDict ** p_c_dict = (ZSTD_CDict **)luaL_checkudata(L, 1, "zstd_c_dict");
+        ZSTD_CDict * c_dict = *p_c_dict;
+
+        lua_settop(L, 0);
+
+        ZSTD_freeCDict(c_dict);
+        *p_c_dict = nullptr;
+        return 0;
+    }
+
+    static int lua_zstd_create_c_dict(lua_State *L) {
+        lua_settop(L, 2);
+        size_t dict_buff_len;
+        const char * dict_buff = luaL_checklstring(L, 1, &dict_buff_len);
+        int level = luaL_optinteger(L, 2, ZSTD_CLEVEL_DEFAULT);
+
+        ZSTD_CDict * c_dict = ZSTD_createCDict(dict_buff, dict_buff_len, level);
+        if (!c_dict) {
+            return luaL_error(L, "zstd error: can not create a CDict");
+        }
+
+        ZSTD_CDict ** p_cdict = (ZSTD_CDict **)lua_newuserdata(L, sizeof(void *));
+
+        lua_settop(L, 0);
+        if (luaL_newmetatable(L, "zstd_c_dict")) {
+            *p_cdict = c_dict;
+
+            lua_pushcfunction(L, lua_zstd_c_dict_tostring);
+            lua_setfield(L, -2, "__tostring");
+
+            lua_pushcfunction(L, lua_zstd_c_dict_gc);
+            lua_setfield(L, -2, "__gc");
+
+            lua_setmetatable(L, -2);
+            return 1;
+        } else {
+            ZSTD_freeCDict(c_dict);
+            return luaL_error(L, "zstd error: can not create a zstd_c_dict metatable");
+        }
+    }
+
+    /**
+     * ZSTD C Context
+     * 
+     */
+
     static int lua_zstd_c_context_compress(lua_State *L) {
         lua_settop(L, 3);
         ZSTD_CCtx * ctx = check_c_context(L, 1);
@@ -143,8 +269,9 @@ extern "C" {
             return luaL_error(L, "zstd error: %s", ZSTD_getErrorName(ret));
         }
 
-        *(ZSTD_CCtx **)lua_newuserdata(L, sizeof(void *)) = c_context;
+        ZSTD_CCtx ** p_cctx = (ZSTD_CCtx **)lua_newuserdata(L, sizeof(void *));
         if (luaL_newmetatable(L, "zstd_c_context")) {
+            *p_cctx = c_context;
             luaL_newlib(L, lua_zstd_c_context_functions);
             lua_setfield(L, -2, "__index");
 
@@ -153,10 +280,21 @@ extern "C" {
 
             lua_pushcfunction(L, lua_zstd_c_context_gc);
             lua_setfield(L, -2, "__gc");
+
+            lua_setmetatable(L, -2);
+            return 1;
+        } else {
+            ZSTD_freeCCtx(c_context);
+            return luaL_error(L, "zstd error: can not create a zstd_c_context metatable");
         }
-        lua_setmetatable(L, -2);
-        return 1;
     }
+
+
+    /**
+     * ZSTD D Context
+     * 
+     */
+
 
     static int lua_zstd_d_context_decompress(lua_State *L) {
         lua_settop(L, 2);
@@ -229,8 +367,9 @@ extern "C" {
             return luaL_error(L, "zstd error: can not create a DCtx");
         }
 
-        *(ZSTD_DCtx **)lua_newuserdata(L, sizeof(void *)) = d_context;
+        ZSTD_DCtx ** p_dctx = (ZSTD_DCtx **)lua_newuserdata(L, sizeof(void *));
         if (luaL_newmetatable(L, "zstd_d_context")) {
+            *p_dctx = d_context;
             luaL_newlib(L, lua_zstd_d_context_functions);
             lua_setfield(L, -2, "__index");
 
@@ -239,10 +378,20 @@ extern "C" {
 
             lua_pushcfunction(L, lua_zstd_d_context_gc);
             lua_setfield(L, -2, "__gc");
+
+            lua_setmetatable(L, -2);
+            return 1;
+        } else {
+            ZSTD_freeDCtx(d_context);
+            return luaL_error(L, "zstd error: can not create a zstd_d_context metatable");
         }
-        lua_setmetatable(L, -2);
-        return 1;
     }
+
+
+    /**
+     * ZSTD Global
+     * 
+     */
 
     static int lua_zstd_version_number(lua_State *L) {
         lua_settop(L, 0);
@@ -316,6 +465,8 @@ extern "C" {
         {"decompress", lua_zstd_decompress},
         {"create_c_context", lua_zstd_create_c_context},
         {"create_d_context", lua_zstd_create_d_context},
+        {"create_c_dict", lua_zstd_create_c_dict},
+        {"create_d_dict", lua_zstd_create_d_dict},
         {nullptr, nullptr}
     };
     
