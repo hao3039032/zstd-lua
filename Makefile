@@ -1,3 +1,5 @@
+include platform.mk
+
 CC ?= gcc
 CXX ?= g++
 LUA_INCDIR ?= /opt/homebrew/include/lua5.4
@@ -10,5 +12,5 @@ all:
 	$(CXX) $(CFLAGS) -std=c++17 $(CFLAGS) -c lzstd.cpp -o lzstd.o -I ${LUA_INCDIR} -I ${ZSTD_INCDIR}
 	$(CXX) $(LIBFLAG) -o zstd.so lzstd.o -l zstd -L ${ZSTD_LIBDIR}
 
-install: all
+install:
 	cp zstd.so $(INST_LIBDIR)

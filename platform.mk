@@ -1,5 +1,3 @@
-CC ?= gcc
-CXX ?= g++
 PLAT ?= none
 PLATS = linux freebsd macosx
 
