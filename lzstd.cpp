@@ -221,10 +221,86 @@ extern "C" {
         return 1;
     }
 
+    static int lua_zstd_c_context_reset(lua_State *L) {
+        lua_settop(L, 2);
+        ZSTD_CCtx * ctx = check_c_context(L, 1);
+        ZSTD_ResetDirective flag = (ZSTD_ResetDirective)luaL_checkinteger(L, 2);
+
+        lua_settop(L, 0);
+        if (!ctx) return luaL_error(L, "ctx has already release");
+
+        size_t ret = ZSTD_CCtx_reset(ctx, flag);
+        if (ZSTD_isError(ret)) {
+            return luaL_error(L, "zstd error: %s", ZSTD_getErrorName(ret));
+        }
+
+        lua_pushinteger(L, ret);
+        return 1;
+    }
+
+    static int lua_zstd_c_context_load_dict(lua_State *L) {
+        lua_settop(L, 2);
+        ZSTD_CCtx * ctx = check_c_context(L, 1);
+        size_t dict_len;
+        const char * dict = luaL_checklstring(L, 2, &dict_len);
+
+        lua_settop(L, 0);
+        if (!ctx) return luaL_error(L, "ctx has already release");
+
+        size_t ret = ZSTD_CCtx_loadDictionary(ctx, dict, dict_len);
+
+        if (ZSTD_isError(ret)) {
+            return luaL_error(L, "zstd error: %s", ZSTD_getErrorName(ret));
+        }
+
+        lua_pushinteger(L, ret);
+        return 1;
+    }
+
+    static int lua_zstd_c_context_clear_dict(lua_State *L) {
+        lua_settop(L, 1);
+        ZSTD_CCtx * ctx = check_c_context(L, 1);
+
+        lua_settop(L, 0);
+        if (!ctx) return luaL_error(L, "ctx has already release");
+
+        size_t ret = ZSTD_CCtx_refCDict(ctx, nullptr);
+
+        if (ZSTD_isError(ret)) {
+            return luaL_error(L, "zstd error: %s", ZSTD_getErrorName(ret));
+        }
+
+        lua_pushinteger(L, ret);
+        return 1;
+    }
+
+    static int lua_zstd_c_context_ref_dict(lua_State *L) {
+        lua_settop(L, 2);
+        ZSTD_CCtx * ctx = check_c_context(L, 1);
+        ZSTD_CDict * cdict = check_c_dict(L, 2);
+
+        lua_settop(L, 0);
+        if (!ctx) return luaL_error(L, "ctx has already release");
+        if (!cdict) return luaL_error(L, "cdict has already release");
+
+        size_t ret = ZSTD_CCtx_refCDict(ctx, cdict);
+        
+        if (ZSTD_isError(ret)) {
+            return luaL_error(L, "zstd error: %s", ZSTD_getErrorName(ret));
+        }
+
+        lua_pushinteger(L, ret);
+        return 1;
+    }
+
     static const luaL_Reg lua_zstd_c_context_functions[] = {
         { "compress", lua_zstd_c_context_compress },
         { "set_pledged_src_size", lua_zstd_c_context_set_pledged_src_size},
         { "enable_checksum", lua_zstd_c_context_enable_checksum },
+        { "reset", lua_zstd_c_context_reset },
+        { "load_dict", lua_zstd_c_context_load_dict },
+        { "clear_dict", lua_zstd_c_context_clear_dict },
+        { "ref_dict", lua_zstd_c_context_ref_dict },
         { nullptr, nullptr }
     };
 
@@ -329,8 +405,84 @@ extern "C" {
         return 2;
     }
 
+    static int lua_zstd_d_context_reset(lua_State *L) {
+        lua_settop(L, 2);
+        ZSTD_DCtx * ctx = check_d_context(L, 1);
+        ZSTD_ResetDirective flag = (ZSTD_ResetDirective)luaL_checkinteger(L, 2);
+
+        lua_settop(L, 0);
+        if (!ctx) return luaL_error(L, "ctx has already release");
+
+        size_t ret = ZSTD_DCtx_reset(ctx, flag);
+        if (ZSTD_isError(ret)) {
+            return luaL_error(L, "zstd error: %s", ZSTD_getErrorName(ret));
+        }
+
+        lua_pushinteger(L, ret);
+        return 1;
+    }
+
+    static int lua_zstd_d_context_load_dict(lua_State *L) {
+        lua_settop(L, 2);
+        ZSTD_DCtx * ctx = check_d_context(L, 1);
+        size_t dict_len;
+        const char * dict = luaL_checklstring(L, 2, &dict_len);
+
+        lua_settop(L, 0);
+        if (!ctx) return luaL_error(L, "ctx has already release");
+
+        size_t ret = ZSTD_DCtx_loadDictionary(ctx, dict, dict_len);
+
+        if (ZSTD_isError(ret)) {
+            return luaL_error(L, "zstd error: %s", ZSTD_getErrorName(ret));
+        }
+
+        lua_pushinteger(L, ret);
+        return 1;
+    }
+
+    static int lua_zstd_d_context_clear_dict(lua_State *L) {
+        lua_settop(L, 1);
+        ZSTD_DCtx * ctx = check_d_context(L, 1);
+
+        lua_settop(L, 0);
+        if (!ctx) return luaL_error(L, "ctx has already release");
+
+        size_t ret = ZSTD_DCtx_refDDict(ctx, nullptr);
+
+        if (ZSTD_isError(ret)) {
+            return luaL_error(L, "zstd error: %s", ZSTD_getErrorName(ret));
+        }
+
+        lua_pushinteger(L, ret);
+        return 1;
+    }
+
+    static int lua_zstd_d_context_ref_dict(lua_State *L) {
+        lua_settop(L, 2);
+        ZSTD_DCtx * ctx = check_d_context(L, 1);
+        ZSTD_DDict * ddict = check_d_dict(L, 2);
+
+        lua_settop(L, 0);
+        if (!ctx) return luaL_error(L, "ctx has already release");
+        if (!ddict) return luaL_error(L, "ddict has already release");
+
+        size_t ret = ZSTD_DCtx_refDDict(ctx, ddict);
+        
+        if (ZSTD_isError(ret)) {
+            return luaL_error(L, "zstd error: %s", ZSTD_getErrorName(ret));
+        }
+
+        lua_pushinteger(L, ret);
+        return 1;
+    }
+
     static const luaL_Reg lua_zstd_d_context_functions[] = {
-        { "decompress", lua_zstd_d_context_decompress},
+        { "decompress", lua_zstd_d_context_decompress },
+        { "reset", lua_zstd_d_context_reset },
+        { "load_dict", lua_zstd_d_context_load_dict },
+        { "clear_dict", lua_zstd_d_context_clear_dict },
+        { "ref_dict", lua_zstd_d_context_ref_dict },
         { nullptr, nullptr }
     };
 
@@ -485,6 +637,15 @@ extern "C" {
 
       lua_pushinteger(L, ZSTD_CONTENTSIZE_UNKNOWN);
       lua_setfield(L, -2, "CONTENTSIZE_UNKNOWN");
+
+      lua_pushinteger(L, ZSTD_reset_parameters);
+      lua_setfield(L, -2, "RESET_PARAMETERS");
+
+      lua_pushinteger(L, ZSTD_reset_session_and_parameters);
+      lua_setfield(L, -2, "RESET_SESSION_AND_PARAMETERS");
+
+      lua_pushinteger(L, ZSTD_reset_session_only);
+      lua_setfield(L, -2, "RESET_SESSION_ONLY");
 
       return 1;
     }
