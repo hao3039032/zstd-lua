@@ -3,7 +3,7 @@ CXX ?= g++
 LUA_INCDIR ?= /opt/homebrew/include/lua5.4
 ZSTD_INCDIR ?= /opt/homebrew/include
 ZSTD_LIBDIR ?= /usr/local/lib
-LIBFLAG ?= -shared
+LIBFLAG ?= -bundle -undefined dynamic_lookup -all_load
 CFLAGS ?= -O2 -fPIC
 
 all:
