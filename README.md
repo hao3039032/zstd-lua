@@ -1,3 +1,3 @@
-# lua-kcp
+# zstd-lua
 
 make (macosx|linux)
