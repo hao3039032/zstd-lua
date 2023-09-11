@@ -7,8 +7,7 @@ for i = 1, 100000 do
 end
 
 local c_ctx = zstd.create_c_context()
-local compress_str = c_ctx:compress(test_str, zstd.E_FLUSH)
-local d_ctx = zstd.create_d_context()
-local decompress_str = d_ctx:decompress(compress_str)
+local compress_str = c_ctx:compress(test_str, zstd.E_END)
+local decompress_str = zstd.decompress(compress_str)
 
 print(decompress_str == test_str)

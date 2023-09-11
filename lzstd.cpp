@@ -28,6 +28,8 @@ extern "C" {
 
         lua_settop(L, 0);
 
+        if (!ctx) return luaL_error(L, "ctx has already release");
+
         if (mode != ZSTD_e_continue && mode != ZSTD_e_end && mode != ZSTD_e_flush) {
             return luaL_error(L, "end mode should be one of contine, end or flush");
         }
@@ -59,8 +61,44 @@ extern "C" {
         return 1;
     }
 
+    static int lua_zstd_c_context_set_pledged_src_size(lua_State *L) {
+        lua_settop(L, 2);
+        ZSTD_CCtx * ctx = check_c_context(L, 1);
+        unsigned long long size = luaL_checkinteger(L, 2);
+
+        lua_settop(L, 0);
+        if (!ctx) return luaL_error(L, "ctx has already release");
+
+        size_t ret = ZSTD_CCtx_setPledgedSrcSize(ctx, size);
+        if (ZSTD_isError(ret)) {
+            return luaL_error(L, "zstd error: %s", ZSTD_getErrorName(ret));
+        }
+
+        lua_pushinteger(L, ret);
+        return 1;
+    }
+
+    static int lua_zstd_c_context_enable_checksum(lua_State *L) {
+        lua_settop(L, 2);
+        ZSTD_CCtx * ctx = check_c_context(L, 1);
+        int enable = luaL_checkinteger(L, 2);
+
+        lua_settop(L, 0);
+        if (!ctx) return luaL_error(L, "ctx has already release");
+
+        size_t ret = ZSTD_CCtx_setParameter(ctx, ZSTD_c_checksumFlag, enable);
+        if (ZSTD_isError(ret)) {
+            return luaL_error(L, "zstd error: %s", ZSTD_getErrorName(ret));
+        }
+
+        lua_pushinteger(L, ret);
+        return 1;
+    }
+
     static const luaL_Reg lua_zstd_c_context_functions[] = {
         { "compress", lua_zstd_c_context_compress },
+        { "set_pledged_src_size", lua_zstd_c_context_set_pledged_src_size},
+        { "enable_checksum", lua_zstd_c_context_enable_checksum },
         { nullptr, nullptr }
     };
 
@@ -255,19 +293,18 @@ extern "C" {
 
         auto dst_size = ZSTD_getFrameContentSize(data, data_len);
         if (dst_size == ZSTD_CONTENTSIZE_UNKNOWN) {
-            return luaL_error(L, "zstd decompress size cannot be determined");
+            return luaL_error(L, "zstd decompress size cannot be determined, please use streaming mode decompress it");
         } else if (dst_size == ZSTD_CONTENTSIZE_ERROR) {
             return luaL_error(L, "zstd decompress size determined error");
         }
 
-        char * dst = new char[dst_size];
-        size_t ret = ZSTD_decompress(dst, dst_size, data, data_len);
+        shared_ptr<char[]> dst(new char[dst_size]);
+        size_t ret = ZSTD_decompress(dst.get(), dst_size, data, data_len);
         if (ZSTD_isError(ret)) {
             return luaL_error(L, "zstd error: %s", ZSTD_getErrorName(dst_size));
         }
 
-        lua_pushlstring(L, dst, ret);
-        delete [] dst;
+        lua_pushlstring(L, dst.get(), ret);
         return 1;
     }
     
@@ -294,6 +331,9 @@ extern "C" {
 
       lua_pushinteger(L, ZSTD_e_flush);
       lua_setfield(L, -2, "E_FLUSH");
+
+      lua_pushinteger(L, ZSTD_CONTENTSIZE_UNKNOWN);
+      lua_setfield(L, -2, "CONTENTSIZE_UNKNOWN");
 
       return 1;
     }
