@@ -10,4 +10,4 @@ SHARED := -shared
 macosx: SHARED := -bundle -undefined dynamic_lookup -all_load
 
 linux macosx :
-	$(MAKE) all SHARED="$(SHARED)"
+	$(MAKE) all LIBFLAG="$(SHARED)"
