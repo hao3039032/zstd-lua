@@ -11,4 +11,4 @@ all:
 	$(CXX) $(LIBFLAG) -o zstd.so lzstd.o -l zstd -L ${ZSTD_LIBDIR}
 
 install:
-	cp zstd.so $(INST_LIBDIR)
+	cp zstd.so $(INST_LIBDIR)/zstd.so
