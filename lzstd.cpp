@@ -62,10 +62,10 @@ extern "C" {
         }
 
         ZSTD_DDict ** p_ddict = (ZSTD_DDict **)lua_newuserdata(L, sizeof(void *));
+        *p_ddict = d_dict;
 
         lua_settop(L, 0);
         if (luaL_newmetatable(L, "zstd_d_dict")) {
-            *p_ddict = d_dict;
 
             lua_pushcfunction(L, lua_zstd_d_dict_tostring);
             lua_setfield(L, -2, "__tostring");
@@ -117,11 +117,10 @@ extern "C" {
         }
 
         ZSTD_CDict ** p_cdict = (ZSTD_CDict **)lua_newuserdata(L, sizeof(void *));
+        *p_cdict = c_dict;
 
         lua_settop(L, 0);
         if (luaL_newmetatable(L, "zstd_c_dict")) {
-            *p_cdict = c_dict;
-
             lua_pushcfunction(L, lua_zstd_c_dict_tostring);
             lua_setfield(L, -2, "__tostring");
 
@@ -338,8 +337,9 @@ extern "C" {
         }
 
         ZSTD_CCtx ** p_cctx = (ZSTD_CCtx **)lua_newuserdata(L, sizeof(void *));
+        *p_cctx = c_context;
+
         if (luaL_newmetatable(L, "zstd_c_context")) {
-            *p_cctx = c_context;
             luaL_newlib(L, lua_zstd_c_context_functions);
             lua_setfield(L, -2, "__index");
 
@@ -511,8 +511,8 @@ extern "C" {
         }
 
         ZSTD_DCtx ** p_dctx = (ZSTD_DCtx **)lua_newuserdata(L, sizeof(void *));
+        *p_dctx = d_context;
         if (luaL_newmetatable(L, "zstd_d_context")) {
-            *p_dctx = d_context;
             luaL_newlib(L, lua_zstd_d_context_functions);
             lua_setfield(L, -2, "__index");
 
