@@ -72,13 +72,9 @@ extern "C" {
 
             lua_pushcfunction(L, lua_zstd_d_dict_gc);
             lua_setfield(L, -2, "__gc");
-
-            lua_setmetatable(L, -2);
-            return 1;
-        } else {
-            ZSTD_freeDDict(d_dict);
-            return luaL_error(L, "zstd error: can not create a zstd_d_dict metatable");
         }
+        lua_setmetatable(L, -2);
+        return 1;
     }
 
 
@@ -131,13 +127,9 @@ extern "C" {
 
             lua_pushcfunction(L, lua_zstd_c_dict_gc);
             lua_setfield(L, -2, "__gc");
-
-            lua_setmetatable(L, -2);
-            return 1;
-        } else {
-            ZSTD_freeCDict(c_dict);
-            return luaL_error(L, "zstd error: can not create a zstd_c_dict metatable");
         }
+        lua_setmetatable(L, -2);
+        return 1;
     }
 
     /**
@@ -356,13 +348,10 @@ extern "C" {
 
             lua_pushcfunction(L, lua_zstd_c_context_gc);
             lua_setfield(L, -2, "__gc");
-
-            lua_setmetatable(L, -2);
-            return 1;
-        } else {
-            ZSTD_freeCCtx(c_context);
-            return luaL_error(L, "zstd error: can not create a zstd_c_context metatable");
         }
+
+        lua_setmetatable(L, -2);
+        return 1;
     }
 
 
@@ -530,13 +519,10 @@ extern "C" {
 
             lua_pushcfunction(L, lua_zstd_d_context_gc);
             lua_setfield(L, -2, "__gc");
-
-            lua_setmetatable(L, -2);
-            return 1;
-        } else {
-            ZSTD_freeDCtx(d_context);
-            return luaL_error(L, "zstd error: can not create a zstd_d_context metatable");
-        }
+        } 
+        
+        lua_setmetatable(L, -2);
+        return 1;
     }
 
 
