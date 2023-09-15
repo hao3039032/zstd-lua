@@ -368,6 +368,8 @@ extern "C" {
         const char * data = luaL_checklstring(L, 2, &data_len);
 
         lua_settop(L, 0);
+        if (!ctx) return luaL_error(L, "ctx has already release");
+
         ZSTD_inBuffer input {data, data_len, 0};
 
         size_t buffer_out_size = ZSTD_DStreamOutSize();
@@ -520,7 +522,7 @@ extern "C" {
             lua_pushcfunction(L, lua_zstd_d_context_gc);
             lua_setfield(L, -2, "__gc");
         } 
-        
+
         lua_setmetatable(L, -2);
         return 1;
     }
